@@ -2,10 +2,11 @@
 
 ## How to run
 
-1. Open 2 cmd Windows and enter to path `cd../FTP_encoded_from_scratch`
+1. Open cmd Windows in server machine and enter to path `cd../FTP_encoded_from_scratch`
 2. Open the server file for the server run `python ftpserver.py`
-3. Open the client file for the client run `python ftpclient.py`
-
+3. Open cmd Windows in Client machine and enter to path `cd../FTP_encoded_from_scratch`
+4. Open the client file for the client run `python ftpclient.py`
+5. You can add more clients as you want. The system supports multi-processors. Just repeat steps (3-4)
 
 ## Supported commands
 
