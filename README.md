@@ -10,14 +10,23 @@
 ## Supported commands
 
 `LIST <path>` - nformation of a directory or file or information of current remote directory if not specified
+
 `STOR <file_name>` - copy file to current remote directory 
+
 `RETR <file_name>` - retrieve file from current remote directory
+
 `PWD` - get current remote directory
+
 `CDUP` - change to parent remote directory
+
 `CWD <path>` - change current remote directory
+
 `MKD` - make a directory in remote server
+
 `RMD <dir_name>` - remove a directory in remote server
+
 `DELE <file_name>` - delete a file in remote server 
+
 `QUIT` - quit connection
 
 
