@@ -1,12 +1,15 @@
-# SCE 2020 Data security project
+# **File Transfer Protocol**
+
+*SCE 2020 - Data security project<br /> 
 
 ## How to run
 
-1. Open cmd Window in server machine and enter to path `cd../FTP_encoded_from_scratch`
-2. Open the server file for the server run `python ftpserver.py`
-3. Open cmd Window in Client machine and enter to path `cd../FTP_encoded_from_scratch`
-4. Open the client file for the client run `python ftpclient.py`
-5. You can add more clients as you want. The system supports multi-processors. Just repeat steps (3-4)
+## **How to run**
+- clone this project
+- make sure you have python 3 installed
+- run the server by typing `python ftpserver.py` (by default server will use localhost, port 10021 for transfer &amp; 10020 for data transfer)
+- In a different terminal session, run the client by typing `python ftpclient.py` (by default it will connect to localhost port 10021 &amp; 10020) 
+- start to give command to the server (see some **commands** below)
 
 ## Supported commands
 
@@ -31,6 +34,13 @@
 `SYST` - Get server system information
 
 `QUIT` - quit connection
+
+### **Milestones**
+- Socket
+- Multiprocessing
+- Read from arguments for server address &amp; ports
+- Data security
+
 
 
 ## Team:
