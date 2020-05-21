@@ -228,7 +228,6 @@ class FTPThreadServer(threading.Thread):
 
 	def STOR(self, cmd):
 		path = cmd[4:].strip()
-		print (path)
 		if not path:
 			massage = '501 Missing arguments <filename>.\r\n'
 			massage = massage.encode('utf-8')
@@ -242,7 +241,7 @@ class FTPThreadServer(threading.Thread):
 			file_write = open(fname, 'w')
 			while True:
 				data = client_data.recv(1024)
-				data = data.decode("utf-8")
+				data = data.decode('utf-8')
 				if not data:
 					break
 				file_write.write(data)
@@ -280,6 +279,7 @@ class FTPThreadServer(threading.Thread):
 				data = file_read.read(1024)
 
 				while data:
+					data = data.encode("utf-8")
 					client_data.send(data)
 					data = file_read.read(1024)
 

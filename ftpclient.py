@@ -56,7 +56,11 @@ class FTPclient:
 
 			cmd  = command[:4].strip().upper()
 			path = command[4:].strip()
-
+			cwd = os.getcwd()
+			fname = os.path.join(cwd, path)
+			if cmd == 'STOR' and not os.path.isfile(fname):
+				print('550 File not found.\r\n')
+				continue
 			try:
 				b = command.encode('utf-8')
 				self.sock.send(b)
@@ -103,9 +107,9 @@ class FTPclient:
 
 			f = open(path, 'r')
 			upload = f.read(1024)
-			b = upload.encode('utf-8')
 			while upload:
-				self.datasock.send(b)
+				upload = upload.encode('utf-8')
+				self.datasock.send(upload)
 				upload = f.read(1024)
 		except Exception as e:
 			print (str(e))
@@ -115,14 +119,16 @@ class FTPclient:
 
 	def RETR(self, path):
 		print ('Retrieving', path, 'from the server')
-		try: 
+		try:
 			self.connect_datasock()
 
 			f = open(path,'w')
 			while True:
 				download = self.datasock.recv(1024)
+				if not download:
+					break
+
 				download = download.decode('utf-8')
-				if not download: break
 				f.write(download)
 		except Exception as e:
 			print (str(e))
@@ -137,6 +143,7 @@ class FTPclient:
 
 		print ('FTP client terminating...')
 		quit()
+
 
 address = raw_input("Destination address - if left empty, default address is localhost: ")
 
