@@ -28,6 +28,8 @@
 
 `DELE <file_name>` - delete a file in remote server 
 
+`SYST` - Get server system information
+
 `QUIT` - quit connection
 
 

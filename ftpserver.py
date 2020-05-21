@@ -19,6 +19,7 @@ import os
 import sys
 import threading
 import time
+import platform
 
 from pip._vendor.distlib.compat import raw_input
 
@@ -65,6 +66,23 @@ class FTPThreadServer(threading.Thread):
 			pass
 
 	def run(self):
+		print('Login Request, client:' + str(self.client_address) + '\n')
+		username_client, password_client = 'a', 'a'
+		username, password = 'roni', 'gold'
+		login_client = username_client + password_client
+		login = username + password
+		while login_client != login:
+			login_client = self.client.recv(1024)
+			login_client = login_client.decode("utf-8")
+			if login_client == login:
+				massage = 'successfully connected!' + '\n'
+				massage = massage.encode('utf-8')
+				self.client.send(massage)
+			else:
+				print('incorrect! login_client: ', login_client, 'login: ', login, '\n')
+				massage = 'Username or password incorrect. try again.' + '\n'
+				massage = massage.encode('utf-8')
+				self.client.send(massage)
 		try :
 			print ('client connected: ' + str(self.client_address) + '\n')
 
@@ -295,6 +313,16 @@ class FTPThreadServer(threading.Thread):
 				client_data.close()
 				self.close_datasock()
 				file_read.close()
+
+	def SYST(self, cmd):
+		massage = 'Server type: ' + platform.system() + '\r\n' +\
+				  'Server name: ' + os.name + '\r\n' +\
+				  'Server release: ' + platform.release() + '\r\n' +\
+				  'Server machine: ' + platform.machine() + '\r\n'  + \
+				  'Server version: ' + platform.version() + '\r\n'
+
+		massage = massage.encode('utf-8')
+		self.client.send(massage)
 
 class FTPserver:
 	def __init__(self, port, data_port):

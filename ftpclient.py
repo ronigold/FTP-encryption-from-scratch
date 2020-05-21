@@ -44,7 +44,18 @@ class FTPclient:
 			self.create_connection()
 		except Exception as e:
 			self.close_client()
-
+		print('Sending server login request ...')
+		while True:
+			username = raw_input('Enter username: ')
+			password = raw_input('Enter password: ')
+			login = username + password
+			login = login.encode('utf-8')
+			self.sock.send(login)
+			data = self.sock.recv(1024)
+			data = data.decode('utf-8')
+			print(data)
+			if data == 'successfully connected!' + '\n':
+				break
 		while True:
 			try:
 				command = raw_input('Enter command: ')
@@ -58,6 +69,9 @@ class FTPclient:
 			path = command[4:].strip()
 			cwd = os.getcwd()
 			fname = os.path.join(cwd, path)
+			if cmd == 'STOR' and not path:
+				print('501 Missing arguments <filename>.\r\n')
+				continue
 			if cmd == 'STOR' and not os.path.isfile(fname):
 				print('550 File not found.\r\n')
 				continue
