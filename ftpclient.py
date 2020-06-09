@@ -15,9 +15,33 @@
 import socket
 import os
 import sys
-
+import string
 from pip._vendor.distlib.compat import raw_input
 
+def caesar_encode(text, step, alphabets = (string.ascii_lowercase, string.ascii_uppercase, string.digits)):
+
+    def shift(alphabet):
+        return alphabet[step:] + alphabet[:step]
+
+    shifted_alphabets = tuple(map(shift, alphabets))
+    joined_aphabets = ''.join(alphabets)
+    joined_shifted_alphabets = ''.join(shifted_alphabets)
+    table = str.maketrans(joined_aphabets, joined_shifted_alphabets)
+    text = text.translate(table); print('send encode message to client(Caesars Method)', text)
+    return text.encode('utf-8')
+
+def caesar_decode(text, step, alphabets = (string.ascii_lowercase, string.ascii_uppercase, string.digits)):
+
+    def shift(alphabet):
+        return alphabet[step:] + alphabet[:step]
+    step = -step
+    text = text.decode('utf-8')
+    shifted_alphabets = tuple(map(shift, alphabets))
+    joined_aphabets = ''.join(alphabets)
+    joined_shifted_alphabets = ''.join(shifted_alphabets)
+    table = str.maketrans(joined_aphabets, joined_shifted_alphabets)
+    text = text.translate(table)
+    return text
 
 class FTPclient:
 	def __init__(self, address, port, data_port):
@@ -25,6 +49,7 @@ class FTPclient:
 		self.address = address
 		self.port = int(port)
 		self.data_port = int(data_port)
+		self.step = 1
 
 	def create_connection(self):
 	  print ('Starting connection to', self.address, ':', self.port)
@@ -45,14 +70,20 @@ class FTPclient:
 		except Exception as e:
 			self.close_client()
 		print('Sending server login request ...')
+		step = self.sock.recv(1024)
+		step = step.decode('utf-8')
+		step = int(step)
+		self.step = step
+		print('Key recv from server to caesar encode:', self.step)
 		while True:
 			username = raw_input('Enter username: ')
 			password = raw_input('Enter password: ')
-			login = username + password
-			login = login.encode('utf-8')
-			self.sock.send(login)
+			username = caesar_encode(username, self.step)
+			self.sock.send(username)
+			password = caesar_encode(password, self.step)
+			self.sock.send(password)
 			data = self.sock.recv(1024)
-			data = data.decode('utf-8')
+			data = caesar_decode(data, self.step)
 			print(data)
 			if data == 'successfully connected!' + '\n':
 				break
@@ -76,10 +107,10 @@ class FTPclient:
 				print('550 File not found.\r\n')
 				continue
 			try:
-				b = command.encode('utf-8')
+				b = caesar_encode(command, self.step)
 				self.sock.send(b)
 				data = self.sock.recv(1024)
-				data = data.decode('utf-8')
+				data = caesar_decode(data, self.step)
 				print (data)
 
 				if (cmd == 'QUIT'):
@@ -89,7 +120,7 @@ class FTPclient:
 						func = getattr(self, cmd)
 						func(path)
 						data = self.sock.recv(1024)
-						data = data.decode('utf-8')
+						data = caesar_decode(data, self.step)
 						print (data)
 			except Exception as e:
 				print (str(e))
@@ -105,7 +136,7 @@ class FTPclient:
 
 			while True:
 				dirlist = self.datasock.recv(1024)
-				dirlist = dirlist.decode('utf-8')
+				dirlist = caesar_decode(dirlist, self.step)
 				if not dirlist: break
 				sys.stdout.write(dirlist)
 				sys.stdout.flush()
@@ -122,7 +153,7 @@ class FTPclient:
 			f = open(path, 'r')
 			upload = f.read(1024)
 			while upload:
-				upload = upload.encode('utf-8')
+				upload = caesar_encode(upload, self.step)
 				self.datasock.send(upload)
 				upload = f.read(1024)
 		except Exception as e:
@@ -142,7 +173,7 @@ class FTPclient:
 				if not download:
 					break
 
-				download = download.decode('utf-8')
+				download = caesar_decode(download, self.step)
 				f.write(download)
 		except Exception as e:
 			print (str(e))

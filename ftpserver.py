@@ -20,9 +20,34 @@ import sys
 import threading
 import time
 import platform
+import string
+from random import randint
 
 from pip._vendor.distlib.compat import raw_input
 
+def caesar_encode(text, step, alphabets = (string.ascii_lowercase, string.ascii_uppercase, string.digits)):
+
+    def shift(alphabet):
+        return alphabet[step:] + alphabet[:step]
+
+    shifted_alphabets = tuple(map(shift, alphabets))
+    joined_aphabets = ''.join(alphabets)
+    joined_shifted_alphabets = ''.join(shifted_alphabets)
+    table = str.maketrans(joined_aphabets, joined_shifted_alphabets)
+    text = text.translate(table); print('send encode message to server(Caesars Method)', text)
+    return text.encode('utf-8')
+
+def caesar_decode(text, step, alphabets = (string.ascii_lowercase, string.ascii_uppercase, string.digits)):
+    def shift(alphabet):
+        return alphabet[step:] + alphabet[:step]
+    step = -step;
+    text = text.decode('utf-8'); print(text)
+    shifted_alphabets = tuple(map(shift, alphabets))
+    joined_aphabets = ''.join(alphabets)
+    joined_shifted_alphabets = ''.join(shifted_alphabets)
+    table = str.maketrans(joined_aphabets, joined_shifted_alphabets)
+    text = text.translate(table)
+    return text
 
 class FTPThreadServer(threading.Thread):
 	def __init__(self, client_client_address, local_ip, data_port):
@@ -31,6 +56,7 @@ class FTPThreadServer(threading.Thread):
 		self.client_address = client_address
 		self.cwd = os.getcwd()
 		self.data_address = (local_ip, data_port)
+		self.step = randint(1,22)
 
 		threading.Thread.__init__(self)
 
@@ -47,7 +73,7 @@ class FTPThreadServer(threading.Thread):
 			
 			print ('Data socket is started. Listening to' + str(self.data_address) + '...')
 			massage = '125 Data connection already open; transfer starting.\r\n'
-			massage = massage.encode('utf-8')
+			massage = caesar_encode(massage, self.step)
 			self.client.send(massage)
 
 			return self.datasock.accept()
@@ -55,7 +81,7 @@ class FTPThreadServer(threading.Thread):
 			print ('ERROR: test ' + str(self.client_address) + ': ' + str(e))
 			self.close_datasock()
 			massage = '425 Cannot open data connection.\r\n'
-			massage = massage.encode('utf-8')
+			massage = caesar_encode(massage, self.step)
 			self.client.send(massage)
 			
 	def close_datasock(self):
@@ -65,30 +91,38 @@ class FTPThreadServer(threading.Thread):
 		except:
 			pass
 
+	def login(self, username, password, username_client, password_client):
+		return (username == username_client and password == password_client)
+
 	def run(self):
 		print('Login Request, client:' + str(self.client_address) + '\n')
+		massage = str(self.step)
+		massage = massage.encode('utf-8')
+		self.client.send(massage)
 		username_client, password_client = 'a', 'a'
 		username, password = 'roni', 'gold'
-		login_client = username_client + password_client
-		login = username + password
-		while login_client != login:
-			login_client = self.client.recv(1024)
-			login_client = login_client.decode("utf-8")
-			if login_client == login:
+		while not self.login(username, password, username_client, password_client):
+			username_client = self.client.recv(1024)
+			username_client = caesar_decode(username_client, self.step)
+			password_client = self.client.recv(1024)
+			password_client = caesar_decode(password_client, self.step)
+			if self.login(username, password, username_client, password_client):
 				massage = 'successfully connected!' + '\n'
-				massage = massage.encode('utf-8')
+				massage = caesar_encode(massage, self.step)
 				self.client.send(massage)
 			else:
-				print('incorrect! login_client: ', login_client, 'login: ', login, '\n')
+				print('incorrect!. login_client:', username_client, password_client)
+				print('login:', username, password)
+
 				massage = 'Username or password incorrect. try again.' + '\n'
-				massage = massage.encode('utf-8')
+				massage = caesar_encode(massage, self.step)
 				self.client.send(massage)
 		try :
 			print ('client connected: ' + str(self.client_address) + '\n')
 
 			while True:
 				cmd = self.client.recv(1024)
-				cmd = cmd.decode("utf-8")
+				cmd = caesar_decode(cmd, self.step)
 				if not cmd: break
 				print('commands from ' + str(self.client_address) + ': ' + cmd)
 				try:
@@ -97,7 +131,7 @@ class FTPThreadServer(threading.Thread):
 				except AttributeError as e:
 					print ('ERROR: ' + str(self.client_address) + ': Invalid Command.')
 					massage = '550 Invalid Command\r\n'
-					massage = massage.encode('utf-8')
+					massage = caesar_encode(massage, self.step)
 					self.client.send(massage)
 		except Exception as e:
 			print ('ERROR: ' + str(self.client_address) + ': ' + str(e))
@@ -106,7 +140,7 @@ class FTPThreadServer(threading.Thread):
 	def QUIT(self, cmd):
 		try:
 			massage = '221 Goodbye.\r\n'
-			massage = massage.encode('utf-8')
+			massage = caesar_encode(massage, self.step)
 			self.client.send(massage)
 		except:
 			pass
@@ -129,7 +163,7 @@ class FTPThreadServer(threading.Thread):
 
 			header = '| %*s | %9s | %12s | %20s | %11s | %12s |' % (max_length, 'Name', 'Filetype', 'Filesize', 'Last Modified', 'Permission', 'User/Group')
 			table = '%s\n%s\n%s\n' % ('-' * len(header), header, '-' * len(header))
-			massage = table.encode('utf-8')
+			massage = caesar_encode(table, self.step)
 			client_data.send(massage)
 
 			for i in listdir:
@@ -137,20 +171,20 @@ class FTPThreadServer(threading.Thread):
 				stat = os.stat(path)
 				data = '| %*s | %9s | %12s | %20s | %11s | %12s |\n' % (max_length, i, 'Directory' if os.path.isdir(path) else 'File', str(stat.st_size) + 'B', time.strftime('%b %d, %Y %H:%M', time.localtime(stat.st_mtime))
 					, oct(stat.st_mode)[-4:], str(stat.st_uid) + '/' + str(stat.st_gid))
-				massage = data.encode('utf-8')
+				massage = caesar_encode(data, self.step)
 				client_data.send(massage)
 
 			table = '%s\n' % ('-' * len(header))
-			massage = table.encode('utf-8')
+			massage = caesar_encode(table, self.step)
 			client_data.send(massage)
 
 			massage = '\r\n226 Directory send OK.\r\n'
-			massage = massage.encode('utf-8')
+			massage = caesar_encode(massage, self.step)
 			self.client.send(massage)
 		except Exception as e:
 			print ('ERROR: ' + str(self.client_address) + ': ' + str(e))
 			massage = '426 Connection closed; transfer aborted.\r\n'
-			massage = massage.encode('utf-8')
+			massage = caesar_encode(massage, self.step)
 			self.client.send(massage)
 		finally:
 			client_data.close()
@@ -158,7 +192,7 @@ class FTPThreadServer(threading.Thread):
 
 	def PWD(self, cmd):
 		massage = '257 \"%s\".\r\n' % self.cwd
-		massage = massage.encode('utf-8')
+		massage = caesar_encode(massage, self.step)
 		self.client.send(massage)
 
 	def CWD(self, cmd):
@@ -166,12 +200,12 @@ class FTPThreadServer(threading.Thread):
 		if (os.path.isdir(dest)):
 			self.cwd = dest
 			massage = '250 OK \"%s\".\r\n' % self.cwd
-			massage = massage.encode('utf-8')
+			massage = caesar_encode(massage, self.step)
 			self.client.send(massage)
 		else:
 			print ('ERROR: ' + str(self.client_address) + ': No such file or directory.')
 			massage = '550 \"' + dest + '\": No such file or directory.\r\n'
-			massage = massage.encode('utf-8')
+			massage = caesar_encode(massage, self.step)
 			self.client.send(massage)
 
 	def CDUP(self, cmd):
@@ -179,12 +213,12 @@ class FTPThreadServer(threading.Thread):
 		if (os.path.isdir(dest)):
 			self.cwd = dest
 			massage = '250 OK \"%s\".\r\n' % self.cwd
-			massage = massage.encode('utf-8')
+			massage = caesar_encode(massage, self.step)
 			self.client.send(massage)
 		else:
 			print ('ERROR: ' + str(self.client_address) + ': No such file or directory.')
 			massage = '550 \"' + dest + '\": No such file or directory.\r\n'
-			massage = massage.encode('utf-8')
+			massage = caesar_encode(massage, self.step)
 			self.client.send(massage)
 
 	def MKD(self, cmd):
@@ -193,17 +227,17 @@ class FTPThreadServer(threading.Thread):
 		try:
 			if not path:
 				massage = '501 Missing arguments <dirname>.\r\n'
-				massage = massage.encode('utf-8')
+				massage = caesar_encode(massage, self.step)
 				self.client.send(massage)
 			else:
 				os.mkdir(dirname)
 				massage = '250 Directory created: ' + dirname + '.\r\n'
-				massage = massage.encode('utf-8')
+				massage = caesar_encode(massage, self.step)
 				self.client.send(massage)
 		except Exception as e:
 			print ('ERROR: ' + str(self.client_address) + ': ' + str(e))
 			massage = '550 Failed to create directory ' + dirname + '.'
-			massage = massage.encode('utf-8')
+			massage = caesar_encode(massage, self.step)
 			self.client.send('550 Failed to create directory ' + dirname + '.')
 
 	def RMD(self, cmd):
@@ -212,17 +246,17 @@ class FTPThreadServer(threading.Thread):
 		try:
 			if not path:
 				massage = '501 Missing arguments <dirname>.\r\n'
-				massage = massage.encode('utf-8')
+				massage = caesar_encode(massage, self.step)
 				self.client.send(massage)
 			else:
 				os.rmdir(dirname)
 				massage = '250 Directory deleted: ' + dirname + '.\r\n'
-				massage = massage.encode('utf-8')
+				massage = caesar_encode(massage, self.step)
 				self.client.send(massage)
 		except Exception as e:
 			print ('ERROR: ' + str(self.client_address) + ': ' + str(e))
 			massage = '550 Failed to delete directory ' + dirname + '.'
-			massage = massage.encode('utf-8')
+			massage = caesar_encode(massage, self.step)
 			self.client.send(massage)
 
 	def DELE(self, cmd):
@@ -231,24 +265,24 @@ class FTPThreadServer(threading.Thread):
 		try:
 			if not path:
 				massage = '501 Missing arguments <filename>.\r\n'
-				massage = massage.encode('utf-8')
+				massage = caesar_encode(massage, self.step)
 				self.client.send(massage)
 			else:
 				os.remove(filename)
 				massage = '250 File deleted: ' + filename + '.\r\n'
-				massage = massage.encode('utf-8')
+				massage = caesar_encode(massage, self.step)
 				self.client.send(massage)
 		except Exception as e:
 			print ('ERROR: ' + str(self.client_address) + ': ' + str(e))
 			massage = '550 Failed to delete file ' + filename + '.'
-			massage = massage.encode('utf-8')
+			massage = caesar_encode(massage, self.step)
 			self.client.send(massage)
 
 	def STOR(self, cmd):
 		path = cmd[4:].strip()
 		if not path:
 			massage = '501 Missing arguments <filename>.\r\n'
-			massage = massage.encode('utf-8')
+			massage = caesar_encode(massage, self.step)
 			self.client.send(massage)
 			return
 
@@ -259,18 +293,18 @@ class FTPThreadServer(threading.Thread):
 			file_write = open(fname, 'w')
 			while True:
 				data = client_data.recv(1024)
-				data = data.decode('utf-8')
+				data = caesar_decode(data, self.step)
 				if not data:
 					break
 				file_write.write(data)
 
 			massage = '226 Transfer complete.\r\n'
-			massage = massage.encode('utf-8')
+			massage = caesar_encode(massage, self.step)
 			self.client.send(massage)
 		except Exception as e:
 			print ('ERROR: ' + str(self.client_address) + ': ' + str(e))
 			massage = '425 Error writing file.\r\n'
-			massage = massage.encode('utf-8')
+			massage = caesar_encode(massage, self.step)
 			self.client.send(massage)
 		finally:
 			client_data.close()
@@ -281,7 +315,7 @@ class FTPThreadServer(threading.Thread):
 		path = cmd[4:].strip()
 		if not path:
 			massage = '501 Missing arguments <filename>.\r\n'
-			massage = massage.encode('utf-8')
+			massage = caesar_encode(massage, self.step)
 			self.client.send(massage)
 			return
 
@@ -289,7 +323,7 @@ class FTPThreadServer(threading.Thread):
 		(client_data, client_address) = self.start_datasock()
 		if not os.path.isfile(fname):
 			massage = '550 File not found.\r\n'
-			massage = massage.encode('utf-8')
+			massage = caesar_encode(massage, self.step)
 			self.client.send(massage)
 		else:
 			try:
@@ -297,17 +331,17 @@ class FTPThreadServer(threading.Thread):
 				data = file_read.read(1024)
 
 				while data:
-					data = data.encode("utf-8")
+					data = caesar_encode(data, self.step)
 					client_data.send(data)
 					data = file_read.read(1024)
 
 				massage = '226 Transfer complete.\r\n'
-				massage = massage.encode('utf-8')
+				massage = caesar_encode(massage, self.step)
 				self.client.send(massage)
 			except Exception as e:
 				print ('ERROR: ' + str(self.client_address) + ': ' + str(e))
 				massage = '426 Connection closed; transfer aborted.\r\n'
-				massage = massage.encode('utf-8')
+				massage = caesar_encode(massage, self.step)
 				self.client.send(massage)
 			finally:
 				client_data.close()
@@ -315,13 +349,14 @@ class FTPThreadServer(threading.Thread):
 				file_read.close()
 
 	def SYST(self, cmd):
+		print('heare')
 		massage = 'Server type: ' + platform.system() + '\r\n' +\
 				  'Server name: ' + os.name + '\r\n' +\
 				  'Server release: ' + platform.release() + '\r\n' +\
 				  'Server machine: ' + platform.machine() + '\r\n'  + \
 				  'Server version: ' + platform.version() + '\r\n'
 
-		massage = massage.encode('utf-8')
+		massage = caesar_encode(massage, self.step)
 		self.client.send(massage)
 
 class FTPserver:
