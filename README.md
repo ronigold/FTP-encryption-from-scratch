@@ -9,6 +9,7 @@
 - make sure you have python 3 installed
 - open terminal session and run the server by typing `python ftpserver.py` (by default server will use localhost, port 10021 for transfer &amp; 10020 for data transfer)
 - In a different terminal session, run the client by typing `python ftpclient.py` (by default it will connect to localhost port 10021 &amp; 10020) 
+- Enter username 'roni' and password 'abcdefg' to login
 - start to give command to the server (see some **commands** below)
 
 ## Supported commands

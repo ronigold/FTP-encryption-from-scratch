@@ -100,7 +100,7 @@ class FTPThreadServer(threading.Thread):
 		massage = massage.encode('utf-8')
 		self.client.send(massage)
 		username_client, password_client = 'a', 'a'
-		username, password = 'roni', 'gold'
+		username, password = 'roni', 'abcdefg'
 		while not self.login(username, password, username_client, password_client):
 			username_client = self.client.recv(1024)
 			username_client = caesar_decode(username_client, self.step)
