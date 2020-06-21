@@ -22,11 +22,15 @@
 
 ## Supported commands
 
-`LIST` - nformation of a directory or file or information of current remote directory if not specified
+`LIST` - information of a directory or file or information of current remote directory if not specified
 
 `STOR <file_name>` - copy file to current remote directory 
 
 `RETR <file_name>` - retrieve file from current remote directory
+
+`AVBL` - Get the available space on server
+
+`DSIZ` - Get the directory size
 
 `PWD` - get current remote directory
 
@@ -40,9 +44,18 @@
 
 `DELE <file_name>` - delete a file in remote server 
 
+`MDTM <file_name>` - Return the last-modified time of a specified file
+
 `SYST` - Get server system information
 
+`FEAT` - Get the feature list implemented by the server
+
 `QUIT` - quit connection
+
+
+Supported commands based on List of FTP commands in the link below:
+
+https://en.wikipedia.org/wiki/List_of_FTP_commands
 
 
 ### **Milestones**
