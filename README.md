@@ -10,9 +10,13 @@
 - open terminal session and run the server by typing `python ftpserver.py` (by default server will use localhost, port 10021 for transfer &amp; 10020 for data transfer)
 - In a different terminal session, run the client by typing `python ftpclient.py` (by default it will connect to localhost port 10021 &amp; 10020) 
 - Enter username and password to login:
+
 	a. username: `<roni>`, password: `<abcdefg>` 
+	
 	a. username: `<sce>`, password: `<qwer>` 
+	
 	the username and password read from exel `clients` file. to add mor clients add rows in this file.
+	
 - start to give command to the server (see some **commands** below)
 
 
