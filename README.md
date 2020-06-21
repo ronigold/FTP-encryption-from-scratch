@@ -13,7 +13,7 @@
 
 	a. username: `<roni>`, password: `<abcdefg>` 
 	
-	a. username: `<sce>`, password: `<qwer>` 
+	b. username: `<sce>`, password: `<qwer>` 
 	
 	the username and password read from exel `clients` file. to add mor clients add rows in this file.
 	
