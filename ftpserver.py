@@ -173,6 +173,28 @@ class FTPThreadServer(threading.Thread):
 		massage = caesar_encode(massage, self.step)
 		self.client.send(massage)
 
+	def FEAT(self, cmd):
+
+		massage = '------------------------------   feature list implemented by the server   ------------------------------' + '\r\n' + \
+				  '`LIST` - information of a directory or file or information of current remote directory if not specified' + '\r\n' + \
+				  '`STOR <file_name>` - copy file to current remote directory' + '\r\n' + \
+				  '`RETR <file_name>` - retrieve file from current remote directory' + '\r\n' + \
+				  '`AVBL` - Get the available space on server' + '\r\n' + \
+				  '`DSIZ` - Get the directory size' + '\r\n' + \
+				  '`PWD` - get current remote directory' + '\r\n' + \
+				  '`CDUP` - change to parent remote directory' + '\r\n' + \
+				  '`CWD <path>` - change current remote directory' + '\r\n' + \
+				  '`MKD <dir_name>` - make a directory in remote server' + '\r\n' + \
+				  '`RMD <dir_name>` - remove a directory in remote server' + '\r\n' + \
+				  '`DELE <file_name>` - delete a file in remote server' + '\r\n' + \
+				  '`SYST` - Get server system information' + '\r\n' + \
+				  '`FEAT` - Get the feature list implemented by the server' + '\r\n' + \
+				  '`MDTM <file_name>` - Return the last-modified time of a specified file' + '\r\n' + \
+				  '`QUIT` - quit connection' + '\r\n'
+
+		massage = caesar_encode(massage, self.step)
+		self.client.send(massage)
+
 	def CWD(self, cmd):
 		dest = os.path.join(self.cwd, cmd[4:].strip())
 		if (os.path.isdir(dest)):
@@ -185,6 +207,15 @@ class FTPThreadServer(threading.Thread):
 			massage = '\"' + dest + '\": No such file or directory.\r\n'
 			massage = caesar_encode(massage, self.step)
 			self.client.send(massage)
+
+	def AVBL(self, cmd):
+		total, used, free = shutil.disk_usage("/")
+		massage = 'Total: %d GiB' % (total // (2 ** 30)) + '\r\n' + \
+				  'Used: %d GiB' % (used // (2 ** 30)) + '\r\n' + \
+				  'Free: %d GiB' % (free // (2 ** 30)) + '\r\n'
+
+		massage = caesar_encode(massage, self.step)
+		self.client.send(massage)
 
 	def CDUP(self, cmd):
 		dest = os.path.abspath(os.path.join(self.cwd, '..'))
@@ -336,42 +367,11 @@ class FTPThreadServer(threading.Thread):
 		massage = caesar_encode(massage, self.step)
 		self.client.send(massage)
 
-	def AVBL(self, cmd):
-		total, used, free = shutil.disk_usage("/")
-		massage = 'Total: %d GiB' % (total // (2 ** 30)) + '\r\n' + \
-				  'Used: %d GiB' % (used // (2 ** 30)) + '\r\n' + \
-				  'Free: %d GiB' % (free // (2 ** 30)) + '\r\n'
-
-		massage = caesar_encode(massage, self.step)
-		self.client.send(massage)
-
 	def DSIZ(self, cmd):
 		root_directory = Path('.')
 		massage = 'Directory Size: ' + '\r\n' + \
 				  str(sum(f.stat().st_size for f in root_directory.glob('**/*') if f.is_file())) + ' (bytes)' + '\r\n' \
 				+ str(sum(f.stat().st_size for f in root_directory.glob('**/*') if f.is_file())*0.001) + ' KB' + '\r\n'
-
-		massage = caesar_encode(massage, self.step)
-		self.client.send(massage)
-
-	def FEAT(self, cmd):
-
-		massage = '------------------------------   feature list implemented by the server   ------------------------------' + '\r\n' + \
-				  '`LIST` - information of a directory or file or information of current remote directory if not specified' + '\r\n' + \
-				  '`STOR <file_name>` - copy file to current remote directory' + '\r\n' + \
-				  '`RETR <file_name>` - retrieve file from current remote directory' + '\r\n' + \
-				  '`AVBL` - Get the available space on server' + '\r\n' + \
-				  '`DSIZ` - Get the directory size' + '\r\n' + \
-				  '`PWD` - get current remote directory' + '\r\n' + \
-				  '`CDUP` - change to parent remote directory' + '\r\n' + \
-				  '`CWD <path>` - change current remote directory' + '\r\n' + \
-				  '`MKD <dir_name>` - make a directory in remote server' + '\r\n' + \
-				  '`RMD <dir_name>` - remove a directory in remote server' + '\r\n' + \
-				  '`DELE <file_name>` - delete a file in remote server' + '\r\n' + \
-				  '`SYST` - Get server system information' + '\r\n' + \
-				  '`FEAT` - Get the feature list implemented by the server' + '\r\n' + \
-				  '`MDTM <file_name>` - Return the last-modified time of a specified file' + '\r\n' + \
-				  '`QUIT` - quit connection' + '\r\n'
 
 		massage = caesar_encode(massage, self.step)
 		self.client.send(massage)
