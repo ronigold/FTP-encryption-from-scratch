@@ -2,8 +2,6 @@
 
 *SCE 2020 - Data security project<br /> 
 
-## How to run
-
 ## **How to run**
 - clone this project
 - make sure you have python 3 installed

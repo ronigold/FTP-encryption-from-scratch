@@ -1,17 +1,3 @@
-# simple FTP client
-# commands
-#		LIST <path>, information of a directory or file,
-#					 or information of current remote directory if not specified
-#		STOR <file_name>, copy file to current remote directory 
-# 	RETR <file_name>, retrieve file from current remote directory
-# additional commands
-#		PWD, get current remote directory
-#		CDUP, change to parent remote directory
-#		CWD <path>, change current remote directory
-#		MKD, make a directory in remote server
-#		RMD <dir_name>, remove a directory in remote server
-#		DELE <file_name>, delete a file in remote server 
-
 import socket
 import os
 import sys
@@ -85,12 +71,12 @@ class FTPclient:
 			data = self.sock.recv(1024)
 			data = caesar_decode(data, self.step)
 			print(data)
-			if data == 'successfully connected!' + '\n':
+			if data == 'Successfully connected!' + '\n':
 				break
 		while True:
 			try:
 				command = raw_input('Enter command: ')
-				if not command: 
+				if not command:
 					print ('Need a command.')
 					continue
 			except KeyboardInterrupt:
@@ -101,10 +87,10 @@ class FTPclient:
 			cwd = os.getcwd()
 			fname = os.path.join(cwd, path)
 			if cmd == 'STOR' and not path:
-				print('501 Missing arguments <filename>.\r\n')
+				print('Missing arguments <filename>.\r\n')
 				continue
 			if cmd == 'STOR' and not os.path.isfile(fname):
-				print('550 File not found.\r\n')
+				print('File not found.\r\n')
 				continue
 			try:
 				b = caesar_encode(command, self.step)
@@ -181,7 +167,6 @@ class FTPclient:
 			f.close()
 			self.datasock.close()
 
-	# stop FTP client, close the connection and exit the program
 	def close_client(self):
 		print ('Closing socket connection...')
 		self.sock.close()
@@ -195,15 +180,15 @@ address = raw_input("Destination address - if left empty, default address is loc
 if not address:
 	address = 'localhost'
 
-port = raw_input("Port - if left empty, default port is 10021: ")
+port = raw_input("Port - if left empty, default port is 10000: ")
 
 if not port:
-	port = 10021
+	port = 10000
 
-data_port = raw_input("Data port - if left empty, default port is 10020: ")
+data_port = raw_input("Data port - if left empty, default port is 10001: ")
 
 if not data_port:
-	data_port = 10020
+	data_port = 10001
 
 ftpClient = FTPclient(address, port, data_port)
 ftpClient.start()
