@@ -13,7 +13,7 @@ def caesar_encode(text, step, alphabets = (string.ascii_lowercase, string.ascii_
     joined_aphabets = ''.join(alphabets)
     joined_shifted_alphabets = ''.join(shifted_alphabets)
     table = str.maketrans(joined_aphabets, joined_shifted_alphabets)
-    text = text.translate(table); print('send encode message to client(Caesars Method)', text)
+    text = text.translate(table); print('send encode message to server (Caesars Method)', text)
     return text.encode('utf-8')
 
 def caesar_decode(text, step, alphabets = (string.ascii_lowercase, string.ascii_uppercase, string.digits)):

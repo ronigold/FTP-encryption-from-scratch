@@ -5,12 +5,11 @@ import threading
 import time
 import platform
 import string
+import pandas as pd
 from random import randint
-
 from pip._vendor.distlib.compat import raw_input
 
 def caesar_encode(text, step, alphabets = (string.ascii_lowercase, string.ascii_uppercase, string.digits)):
-
     def shift(alphabet):
         return alphabet[step:] + alphabet[:step]
 
@@ -18,7 +17,7 @@ def caesar_encode(text, step, alphabets = (string.ascii_lowercase, string.ascii_
     joined_aphabets = ''.join(alphabets)
     joined_shifted_alphabets = ''.join(shifted_alphabets)
     table = str.maketrans(joined_aphabets, joined_shifted_alphabets)
-    text = text.translate(table); print('Send encode message to server(Caesars Method)', text)
+    text = text.translate(table); print('Send encode message to client (Caesars Method)', text)
     return text.encode('utf-8')
 
 def caesar_decode(text, step, alphabets = (string.ascii_lowercase, string.ascii_uppercase, string.digits)):
@@ -48,7 +47,6 @@ class FTPThreadServer(threading.Thread):
 		try:
 			print('Creating data socket on' + str(self.data_address) + '...')
 
-			# create TCP for data socket
 			self.datasock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 			self.datasock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 
@@ -76,15 +74,21 @@ class FTPThreadServer(threading.Thread):
 			pass
 
 	def login(self, username, password, username_client, password_client):
-		return (username == username_client and password == password_client)
+		print(username, password, username_client, password_client, username_client in (username), password_client in (password))
+		return (username_client in (username) and password_client in (password))
 
 	def run(self):
 		print('Login Request, client:' + str(self.client_address) + '\n')
+		users = pd.read_excel('clients.xlsx')
+		username = []
+		password = []
+		for i in range(len(users)):
+			username.append(users.loc[i, 'username'])
+			password.append(users.loc[i, 'password'])
 		massage = str(self.step)
 		massage = massage.encode('utf-8')
 		self.client.send(massage)
 		username_client, password_client = 'a', 'a'
-		username, password = 'roni', 'abcdefg'
 		while not self.login(username, password, username_client, password_client):
 			username_client = self.client.recv(1024)
 			username_client = caesar_decode(username_client, self.step)

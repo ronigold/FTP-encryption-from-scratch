@@ -1,18 +1,24 @@
 # **File Transfer Protocol - Caesars Method**
 
-*SCE 2020 - Data security project<br /> 
+
+**SCE 2020 - Data security project
+
 
 ## **How to run**
 - clone this project
-- make sure you have python 3 installed
+- make sure you have python 3 installed, and Libraries: `socket`, `pandas`.
 - open terminal session and run the server by typing `python ftpserver.py` (by default server will use localhost, port 10021 for transfer &amp; 10020 for data transfer)
 - In a different terminal session, run the client by typing `python ftpclient.py` (by default it will connect to localhost port 10021 &amp; 10020) 
-- Enter username 'roni' and password 'abcdefg' to login
+- Enter username and password to login:
+	a. username: `<roni>`, password: `<abcdefg>` 
+	a. username: `<sce>`, password: `<qwer>` 
+	the username and password read from exel `clients` file. to add mor clients add rows in this file.
 - start to give command to the server (see some **commands** below)
+
 
 ## Supported commands
 
-`LIST <path>` - nformation of a directory or file or information of current remote directory if not specified
+`LIST` - nformation of a directory or file or information of current remote directory if not specified
 
 `STOR <file_name>` - copy file to current remote directory 
 
@@ -38,11 +44,10 @@
 ### **Milestones**
 
 - Data security (Caesars Method)
+- Excel database management
 - Socket
 - Multiprocessing
 - Read from arguments for server address &amp; ports
-
-
 
 
 ## Team:
