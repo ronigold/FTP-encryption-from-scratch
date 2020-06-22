@@ -22,6 +22,8 @@
 
 ## Supported commands
 
+`ACCT` - Account information
+
 `LIST` - information of a directory or file or information of current remote directory if not specified
 
 `STOR <file_name>` - copy file to current remote directory 
