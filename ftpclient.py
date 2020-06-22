@@ -92,6 +92,9 @@ class FTPclient:
 			if cmd == 'STOR' and not os.path.isfile(fname):
 				print('File not found.\r\n')
 				continue
+			if cmd == 'MDTM' and not os.path.isfile(fname):
+				print('File not found.\r\n')
+				continue
 			try:
 				b = caesar_encode(command, self.step)
 				self.sock.send(b)
@@ -102,7 +105,7 @@ class FTPclient:
 				if (cmd == 'QUIT'):
 					self.close_client()
 				elif (cmd == 'LIST' or cmd == 'STOR' or cmd == 'RETR'):
-					if (data and (data[0:3] == '125')):
+					if (data and (data[0:3] == 'FYI')):
 						func = getattr(self, cmd)
 						func(path)
 						data = self.sock.recv(1024)
@@ -168,25 +171,22 @@ class FTPclient:
 			self.datasock.close()
 
 	def close_client(self):
+
 		print ('Closing socket connection...')
 		self.sock.close()
-
 		print ('FTP client terminating...')
 		quit()
 
 
-address = raw_input("Destination address - if left empty, default address is localhost: ")
-
+address = raw_input("Enter destination address: (if you left empty, default address is localhost) ")
 if not address:
 	address = 'localhost'
 
-port = raw_input("Port - if left empty, default port is 10000: ")
-
+port = raw_input("Enter port: (if you left empty, default port is 10000) ")
 if not port:
 	port = 10000
 
-data_port = raw_input("Data port - if left empty, default port is 10001: ")
-
+data_port = raw_input("Enter data port: (if you left empty, default port is 10001)")
 if not data_port:
 	data_port = 10001
 

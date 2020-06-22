@@ -38,6 +38,7 @@ class FTPThreadServer(threading.Thread):
 		client, client_address = client_client_address
 		self.client = client
 		self.client_address = client_address
+		self.username = 'Unknown'
 		self.cwd = os.getcwd()
 		self.data_address = (local_ip, data_port)
 		self.step = randint(1,22)
@@ -55,7 +56,7 @@ class FTPThreadServer(threading.Thread):
 			self.datasock.listen(5)
 
 			print('Data socket is started. Listening to' + str(self.data_address) + '...')
-			massage = '125 Data connection already open; transfer starting.\r\n'
+			massage = 'FYI Data connection already open; transfer starting.\r\n'
 			massage = caesar_encode(massage, self.step)
 			self.client.send(massage)
 
@@ -96,6 +97,7 @@ class FTPThreadServer(threading.Thread):
 			password_client = self.client.recv(1024)
 			password_client = caesar_decode(password_client, self.step)
 			if self.login(username, password, username_client, password_client):
+				self.username = username_client
 				massage = 'Successfully connected!' + '\n'
 				massage = caesar_encode(massage, self.step)
 				self.client.send(massage)
@@ -126,6 +128,13 @@ class FTPThreadServer(threading.Thread):
 			print ('ERROR: ' + str(self.client_address) + ': ' + str(e))
 			self.QUIT('')
 
+	def ACCT(self, cmd):
+		massage = '------- Account information -------' + '\r\n'  + \
+				  'You are login in as:  ' + self.username  + '\r\n'  + \
+				  'Your address is:  ' + str(self.client_address) + '\r\n'
+
+		massage = caesar_encode(massage, self.step)
+		self.client.send(massage)
 
 	def LIST(self, cmd):
 		print ('LIST', self.cwd)
@@ -176,21 +185,22 @@ class FTPThreadServer(threading.Thread):
 	def FEAT(self, cmd):
 
 		massage = '------------------------------   feature list implemented by the server   ------------------------------' + '\r\n' + \
-				  '`LIST` - information of a directory or file or information of current remote directory if not specified' + '\r\n' + \
-				  '`STOR <file_name>` - copy file to current remote directory' + '\r\n' + \
-				  '`RETR <file_name>` - retrieve file from current remote directory' + '\r\n' + \
-				  '`AVBL` - Get the available space on server' + '\r\n' + \
-				  '`DSIZ` - Get the directory size' + '\r\n' + \
-				  '`PWD` - get current remote directory' + '\r\n' + \
-				  '`CDUP` - change to parent remote directory' + '\r\n' + \
-				  '`CWD <path>` - change current remote directory' + '\r\n' + \
-				  '`MKD <dir_name>` - make a directory in remote server' + '\r\n' + \
-				  '`RMD <dir_name>` - remove a directory in remote server' + '\r\n' + \
-				  '`DELE <file_name>` - delete a file in remote server' + '\r\n' + \
-				  '`SYST` - Get server system information' + '\r\n' + \
-				  '`FEAT` - Get the feature list implemented by the server' + '\r\n' + \
-				  '`MDTM <file_name>` - Return the last-modified time of a specified file' + '\r\n' + \
-				  '`QUIT` - quit connection' + '\r\n'
+				  '1. `ACCT` - Account information' + '\r\n' + \
+				  '2. `LIST` - information of a directory or file or information of current remote directory if not specified' + '\r\n' + \
+				  '3. `STOR <file_name>` - copy file to current remote directory' + '\r\n' + \
+				  '4. `RETR <file_name>` - retrieve file from current remote directory' + '\r\n' + \
+				  '5. `AVBL` - Get the available space on server' + '\r\n' + \
+				  '6. `DSIZ` - Get the directory size' + '\r\n' + \
+				  '7. `PWD` - get current remote directory' + '\r\n' + \
+				  '8. `CDUP` - change to parent remote directory' + '\r\n' + \
+				  '9. `CWD <path>` - change current remote directory' + '\r\n' + \
+				  '10. `MKD <dir_name>` - make a directory in remote server' + '\r\n' + \
+				  '11. `RMD <dir_name>` - remove a directory in remote server' + '\r\n' + \
+				  '12. `DELE <file_name>` - delete a file in remote server' + '\r\n' + \
+				  '13. `SYST` - Get server system information' + '\r\n' + \
+				  '14. `FEAT` - Get the feature list implemented by the server' + '\r\n' + \
+				  '15. `MDTM <file_name>` - Return the last-modified time of a specified file' + '\r\n' + \
+				  '16. `QUIT` - quit connection' + '\r\n'
 
 		massage = caesar_encode(massage, self.step)
 		self.client.send(massage)
@@ -405,9 +415,7 @@ class FTPThreadServer(threading.Thread):
 
 class FTPserver:
 	def __init__(self, port, data_port):
-		# server address at localhost
 		self.address = '0.0.0.0'
-
 		self.port = int(port)
 		self.data_port = int(data_port)
 
@@ -441,11 +449,11 @@ class FTPserver:
 			quit()
 
 
-port = raw_input("Port - if left empty, default port is 10000")
+port = raw_input("Enter port: (if you left empty, default port is 10000)")
 if not port:
 	port = 10000
 
-data_port = raw_input("Data port - if left empty, default port is 10001 ")
+data_port = raw_input("Enter data port: (if you left empty, default port is 10001)")
 if not data_port:
 	data_port = 10001
 
