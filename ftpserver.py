@@ -136,28 +136,30 @@ class FTPThreadServer(threading.Thread):
 			massage = caesar_encode(massage, self.step)
 			self.client.send(massage)
 		else:
-			try:
-				file_read = open(fname, "r")
+			self.retr_data()
+
+	def retr_data(self, fname, client_data):
+		try:
+			file_read = open(fname, "r")
+			data = file_read.read(1024)
+
+			while data:
+				data = caesar_encode(data, self.step)
+				client_data.send(data)
 				data = file_read.read(1024)
 
-				while data:
-					data = caesar_encode(data, self.step)
-					client_data.send(data)
-					data = file_read.read(1024)
-
-				massage = 'Transfer complete.\r\n'
-				massage = caesar_encode(massage, self.step)
-				self.client.send(massage)
-			except Exception as e:
-				print('ERROR: ' + str(self.client_address) + ': ' + str(e))
-				massage = 'Connection closed; transfer aborted.\r\n'
-				massage = caesar_encode(massage, self.step)
-				self.client.send(massage)
-			finally:
-				client_data.close()
-				self.close_datasock()
-				file_read.close()
-
+			massage = 'Transfer complete.\r\n'
+			massage = caesar_encode(massage, self.step)
+			self.client.send(massage)
+		except Exception as e:
+			print('ERROR: ' + str(self.client_address) + ': ' + str(e))
+			massage = 'Connection closed; transfer aborted.\r\n'
+			massage = caesar_encode(massage, self.step)
+			self.client.send(massage)
+		finally:
+			client_data.close()
+			self.close_datasock()
+			file_read.close()
 
 	def DSIZ(self, cmd):
 		root_directory = Path('.')

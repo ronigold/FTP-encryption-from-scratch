@@ -36,6 +36,7 @@ class FTPclient:
 			print (data)
 			if (self.is_need_to_func()):
 				self.aplly_func()
+
 	def aplly_func(self, cmd, path):
 		func = getattr(self, cmd)
 		func(path)
@@ -49,11 +50,13 @@ class FTPclient:
 	def if_QUIT(self, cmd):
 		if (cmd == 'QUIT'):
 			self.close_client()
+
 	def setup(self, command):
 		cmd = command[:4].strip().upper()
 		path = command[4:].strip()
 		cwd = os.getcwd()
 		fname = os.path.join(cwd, path)
+
 	def input_command(self):
 		command = raw_input('Enter command: ')
 		if not command:
