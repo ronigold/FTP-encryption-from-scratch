@@ -31,22 +31,14 @@ class FTPclient:
 				command = self.input_command()
 			except KeyboardInterrupt:
 				self.close_client()
-
-			cmd  = command[:4].strip().upper()
-			path = command[4:].strip()
-			cwd = os.getcwd()
-			fname = os.path.join(cwd, path)
+			cmd, path, cwd, fname = self.setup(command)
 			try:
 				b = caesar_encode(command, self.step)
 				self.sock.send(b)
 				data = self.sock.recv(1024)
 				data = caesar_decode(data, self.step)
 				print (data)
-
-				if (cmd == 'QUIT'):
-					self.close_client()
-				elif (cmd == 'LIST' or cmd == 'STOR' or cmd == 'RETR'):
-					if (data and (data[0:3] == 'FYI')):
+				if (cmd == 'LIST' or cmd == 'STOR' or cmd == 'RETR') and (data and (data[0:3] == 'FYI')):
 						func = getattr(self, cmd)
 						func(path)
 						data = self.sock.recv(1024)
@@ -55,7 +47,14 @@ class FTPclient:
 			except Exception as e:
 				print (str(e))
 				self.close_client()
-
+	def if_QUIT(self, cmd):
+		if (cmd == 'QUIT'):
+			self.close_client()
+	def setup(self, command):
+		cmd = command[:4].strip().upper()
+		path = command[4:].strip()
+		cwd = os.getcwd()
+		fname = os.path.join(cwd, path)
 	def input_command(self):
 		command = raw_input('Enter command: ')
 		if not command:
