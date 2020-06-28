@@ -126,15 +126,11 @@ def MKD(self, cmd):
     path = cmd[4:].strip()
     dirname = os.path.join(self.cwd, path)
     try:
-        if not path:
-            massage = 'Missing arguments <dirname>.\r\n'
-            massage = caesar_encode(massage, self.step)
-            self.client.send(massage)
-        else:
-            os.mkdir(dirname)
-            massage = 'Directory created: ' + dirname + '.\r\n'
-            massage = caesar_encode(massage, self.step)
-            self.client.send(massage)
+        check_path(self, path)
+        os.mkdir(dirname)
+        massage = 'Directory created: ' + dirname + '.\r\n'
+        massage = caesar_encode(massage, self.step)
+        self.client.send(massage)
     except Exception as e:
         print('ERROR: ' + str(self.client_address) + ': ' + str(e))
         massage = 'Failed to create directory ' + dirname + '.'
@@ -146,15 +142,11 @@ def RMD(self, cmd):
     path = cmd[4:].strip()
     dirname = os.path.join(self.cwd, path)
     try:
-        if not path:
-            massage = 'Missing arguments <dirname>.\r\n'
-            massage = caesar_encode(massage, self.step)
-            self.client.send(massage)
-        else:
-            os.rmdir(dirname)
-            massage = 'Directory deleted: ' + dirname + '.\r\n'
-            massage = caesar_encode(massage, self.step)
-            self.client.send(massage)
+        check_path(self, path)
+        os.rmdir(dirname)
+        massage = 'Directory deleted: ' + dirname + '.\r\n'
+        massage = caesar_encode(massage, self.step)
+        self.client.send(massage)
     except Exception as e:
         print('ERROR: ' + str(self.client_address) + ': ' + str(e))
         massage = 'Failed to delete directory ' + dirname + '.'
@@ -166,15 +158,11 @@ def DELE(self, cmd):
     path = cmd[4:].strip()
     filename = os.path.join(self.cwd, path)
     try:
-        if not path:
-            massage = 'Missing arguments <filename>.\r\n'
-            massage = caesar_encode(massage, self.step)
-            self.client.send(massage)
-        else:
-            os.remove(filename)
-            massage = 'File deleted: ' + filename + '.\r\n'
-            massage = caesar_encode(massage, self.step)
-            self.client.send(massage)
+        check_path(self, path)
+        os.remove(filename)
+        massage = 'File deleted: ' + filename + '.\r\n'
+        massage = caesar_encode(massage, self.step)
+        self.client.send(massage)
     except Exception as e:
         print('ERROR: ' + str(self.client_address) + ': ' + str(e))
         massage = 'Failed to delete file ' + filename + '.'
@@ -194,11 +182,7 @@ def SYST(self, cmd):
 
 def STOR(self, cmd):
     path = cmd[4:].strip()
-    if not path:
-        massage = 'Missing arguments <filename>.\r\n'
-        massage = caesar_encode(massage, self.step)
-        self.client.send(massage)
-        return
+    check_path(self, path)
 
     fname = os.path.join(self.cwd, path)
     (client_data, client_address) = self.start_datasock()
@@ -224,3 +208,10 @@ def STOR(self, cmd):
         client_data.close()
         self.close_datasock()
         file_write.close()
+
+def check_path(self, path):
+    if not path:
+        massage = 'Missing arguments <filename>.\r\n'
+        massage = caesar_encode(massage, self.step)
+        self.client.send(massage)
+        return

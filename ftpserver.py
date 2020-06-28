@@ -110,11 +110,7 @@ class FTPThreadServer(threading.Thread):
 
 	def RETR(self, cmd):
 		path = cmd[4:].strip()
-		if not path:
-			massage = 'Missing arguments <filename>.\r\n'
-			massage = caesar_encode(massage, self.step)
-			self.client.send(massage)
-			return
+		check_path(self, path)
 
 		fname = os.path.join(self.cwd, path)
 		(client_data, client_address) = self.start_datasock()
@@ -160,11 +156,7 @@ class FTPThreadServer(threading.Thread):
 
 	def MDTM(self, cmd):
 		path = cmd[4:].strip()
-		if not path:
-			massage = 'Missing arguments <filename>.\r\n'
-			massage = caesar_encode(massage, self.step)
-			self.client.send(massage)
-			return
+		check_path(self, path)
 
 		(mode, ino, dev, nlink, uid, gid, size, atime, mtime, ctime) = os.stat(path)
 		massage = "last modified: %s" % time.ctime(mtime)
