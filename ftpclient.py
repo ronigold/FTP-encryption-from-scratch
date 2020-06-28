@@ -26,43 +26,9 @@ class FTPclient:
 	  	self.close_client()
 
 	def start(self):
-		try:
-			self.create_connection()
-		except Exception as e:
-			self.close_client()
-		print('Sending server login request ...')
-		print('Select an encryption algorithm to receive a key from the server:')
-		massage = raw_input('[1] for Caesars Method [2] for DES')
-		if int(massage) == 2:
-			caesar_encode = DES_encode
-			caesar_decode = DES_decode
-		massage = massage.encode('utf-8')
-		self.sock.send(massage)
-
-		step = self.sock.recv(1024)
-		step = step.decode('utf-8')
-		if int(massage) == 1:
-			step = int(step)
-		self.step = step
-		print('Key recv from server to caesar encode:', self.step)
-		while True:
-			username = raw_input('Enter username: ')
-			password = raw_input('Enter password: ')
-			username = caesar_encode(username, self.step)
-			self.sock.send(username)
-			password = caesar_encode(password, self.step)
-			self.sock.send(password)
-			data = self.sock.recv(1024)
-			data = caesar_decode(data, self.step)
-			print(data)
-			if data == 'Successfully connected!' + '\n':
-				break
 		while True:
 			try:
-				command = raw_input('Enter command: ')
-				if not command:
-					print ('Need a command.')
-					continue
+				command = self.input_command()
 			except KeyboardInterrupt:
 				self.close_client()
 
@@ -70,15 +36,6 @@ class FTPclient:
 			path = command[4:].strip()
 			cwd = os.getcwd()
 			fname = os.path.join(cwd, path)
-			if cmd == 'STOR' and not path:
-				print('Missing arguments <filename>.\r\n')
-				continue
-			if cmd == 'STOR' and not os.path.isfile(fname):
-				print('File not found.\r\n')
-				continue
-			if cmd == 'MDTM' and not os.path.isfile(fname):
-				print('File not found.\r\n')
-				continue
 			try:
 				b = caesar_encode(command, self.step)
 				self.sock.send(b)
@@ -98,6 +55,11 @@ class FTPclient:
 			except Exception as e:
 				print (str(e))
 				self.close_client()
+
+	def input_command(self):
+		command = raw_input('Enter command: ')
+		if not command:
+			print('Need a command.')
 
 	def connect_datasock(self):
 		self.datasock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
