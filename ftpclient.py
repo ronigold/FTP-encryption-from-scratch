@@ -27,26 +27,25 @@ class FTPclient:
 
 	def start(self):
 		while True:
-			try:
-				command = self.input_command()
-			except KeyboardInterrupt:
-				self.close_client()
+			command = self.input_command()
 			cmd, path, cwd, fname = self.setup(command)
-			try:
-				b = caesar_encode(command, self.step)
-				self.sock.send(b)
-				data = self.sock.recv(1024)
-				data = caesar_decode(data, self.step)
-				print (data)
-				if (cmd == 'LIST' or cmd == 'STOR' or cmd == 'RETR') and (data and (data[0:3] == 'FYI')):
-						func = getattr(self, cmd)
-						func(path)
-						data = self.sock.recv(1024)
-						data = caesar_decode(data, self.step)
-						print (data)
-			except Exception as e:
-				print (str(e))
-				self.close_client()
+			b = caesar_encode(command, self.step)
+			self.sock.send(b)
+			data = self.sock.recv(1024)
+			data = caesar_decode(data, self.step)
+			print (data)
+			if (self.is_need_to_func()):
+				self.aplly_func()
+	def aplly_func(self, cmd, path):
+		func = getattr(self, cmd)
+		func(path)
+		data = self.sock.recv(1024)
+		data = caesar_decode(data, self.step)
+		print(data)
+
+	def is_need_to_func(self, cmd, data):
+		return (cmd == 'LIST' or cmd == 'STOR' or cmd == 'RETR') and (data and (data[0:3] == 'FYI'))
+
 	def if_QUIT(self, cmd):
 		if (cmd == 'QUIT'):
 			self.close_client()
