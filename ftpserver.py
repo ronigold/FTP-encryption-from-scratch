@@ -7,19 +7,6 @@ from server_func import *
 import os.path
 from pathlib import Path
 
-def DES_encode(text, key):
-	cipher = DES.new(key, DES.MODE_CBC)
-	if len(text) % 8 != 0:
-		toAdd = 8 - len(text) % 8
-		text += ' '*toAdd
-	text = str.encode(text)
-	return cipher.encrypt(text)
-
-def DES_decode(text, key):
-    cipher = DES.new(key, DES.MODE_CBC)
-    text = cipher.decrypt(text).decode("utf-8") 
-    return re.sub("^\s+|\s+$", "", text, flags=re.UNICODE)
-
 class FTPThreadServer(threading.Thread):
 	def __init__(self, client_client_address, local_ip, data_port):
 		client, client_address = client_client_address
