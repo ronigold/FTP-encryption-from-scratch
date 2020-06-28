@@ -1,33 +1,8 @@
 import socket
 import os
 import sys
-import string
 from pip._vendor.distlib.compat import raw_input
-
-def caesar_encode(text, step, alphabets = (string.ascii_lowercase, string.ascii_uppercase, string.digits)):
-
-    def shift(alphabet):
-        return alphabet[step:] + alphabet[:step]
-
-    shifted_alphabets = tuple(map(shift, alphabets))
-    joined_aphabets = ''.join(alphabets)
-    joined_shifted_alphabets = ''.join(shifted_alphabets)
-    table = str.maketrans(joined_aphabets, joined_shifted_alphabets)
-    text = text.translate(table); print('send encode message to server (Caesars Method)', text)
-    return text.encode('utf-8')
-
-def caesar_decode(text, step, alphabets = (string.ascii_lowercase, string.ascii_uppercase, string.digits)):
-
-    def shift(alphabet):
-        return alphabet[step:] + alphabet[:step]
-    step = -step
-    text = text.decode('utf-8')
-    shifted_alphabets = tuple(map(shift, alphabets))
-    joined_aphabets = ''.join(alphabets)
-    joined_shifted_alphabets = ''.join(shifted_alphabets)
-    table = str.maketrans(joined_aphabets, joined_shifted_alphabets)
-    text = text.translate(table)
-    return text
+from encoded import *
 
 class FTPclient:
 	def __init__(self, address, port, data_port):
@@ -56,9 +31,18 @@ class FTPclient:
 		except Exception as e:
 			self.close_client()
 		print('Sending server login request ...')
+		print('Select an encryption algorithm to receive a key from the server:')
+		massage = raw_input('[1] for Caesars Method [2] for DES')
+		if int(massage) == 2:
+			caesar_encode = DES_encode
+			caesar_decode = DES_decode
+		massage = massage.encode('utf-8')
+		self.sock.send(massage)
+
 		step = self.sock.recv(1024)
 		step = step.decode('utf-8')
-		step = int(step)
+		if int(massage) == 1:
+			step = int(step)
 		self.step = step
 		print('Key recv from server to caesar encode:', self.step)
 		while True:
