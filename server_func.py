@@ -1,9 +1,7 @@
 from encoded import *
 import os
 import shutil
-from pathlib import Path
 import time
-import platform
 
 def ACCT(self, cmd):
     massage = '------- Account information -------' + '\r\n' + \
@@ -31,32 +29,30 @@ def LIST(self, cmd):
         table = '%s\n%s\n%s\n' % ('-' * len(header), header, '-' * len(header))
         massage = caesar_encode(table, self.step)
         client_data.send(massage)
-
-        for i in listdir:
-            path = os.path.join(self.cwd, i)
-            stat = os.stat(path)
-            data = '| %*s | %9s | %12s | %20s | %11s | %12s |\n' % (
-            max_length, i, 'Directory' if os.path.isdir(path) else 'File', str(stat.st_size) + 'B',
-            time.strftime('%b %d, %Y %H:%M', time.localtime(stat.st_mtime))
-            , oct(stat.st_mode)[-4:], str(stat.st_uid) + '/' + str(stat.st_gid))
-            massage = caesar_encode(data, self.step)
-            client_data.send(massage)
-
-        table = '%s\n' % ('-' * len(header))
-        massage = caesar_encode(table, self.step)
-        client_data.send(massage)
-
-        massage = '\r\nDirectory send OK.\r\n'
-        massage = caesar_encode(massage, self.step)
-        self.client.send(massage)
-    except Exception as e:
-        print('ERROR: ' + str(self.client_address) + ': ' + str(e))
-        massage = 'Connection closed; transfer aborted.\r\n'
-        massage = caesar_encode(massage, self.step)
-        self.client.send(massage)
+        listdir()
+        table = create_table()
     finally:
         client_data.close()
         self.close_datasock()
+
+def listdir(self, max_length, client_data):
+    for i in listdir:
+        path = os.path.join(self.cwd, i)
+        stat = os.stat(path)
+        data = '| %*s | %9s | %12s | %20s | %11s | %12s |\n' % (
+            max_length, i, 'Directory' if os.path.isdir(path) else 'File', str(stat.st_size) + 'B',
+            time.strftime('%b %d, %Y %H:%M', time.localtime(stat.st_mtime))
+            , oct(stat.st_mode)[-4:], str(stat.st_uid) + '/' + str(stat.st_gid))
+        massage = caesar_encode(data, self.step)
+        client_data.send(massage)
+
+def create_table(self, header, client_data):
+        table = '%s\n' % ('-' * len(header))
+        massage = caesar_encode(table, self.step)
+        client_data.send(massage)
+        massage = '\r\nDirectory send OK.\r\n'
+        massage = caesar_encode(massage, self.step)
+        self.client.send(massage)
 
 
 def PWD(self, cmd):
