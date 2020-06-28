@@ -4,6 +4,8 @@ import pandas as pd
 from random import randint
 from pip._vendor.distlib.compat import raw_input
 from server_func import *
+import os.path
+from pathlib import Path
 
 def DES_encode(text, key):
 	cipher = DES.new(key, DES.MODE_CBC)
@@ -155,17 +157,6 @@ class FTPThreadServer(threading.Thread):
 				client_data.close()
 				self.close_datasock()
 				file_read.close()
-
-
-	def SYST(self, cmd):
-		massage = 'Server type: ' + platform.system() + '\r\n' + \
-				  'Server name: ' + os.name + '\r\n' + \
-				  'Server release: ' + platform.release() + '\r\n' + \
-				  'Server machine: ' + platform.machine() + '\r\n' + \
-				  'Server version: ' + platform.version() + '\r\n'
-
-		massage = caesar_encode(massage, self.step)
-		self.client.send(massage)
 
 
 	def DSIZ(self, cmd):

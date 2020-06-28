@@ -2,6 +2,7 @@ from encoded import *
 import os
 import shutil
 import time
+import platform
 
 def ACCT(self, cmd):
     massage = '------- Account information -------' + '\r\n' + \
@@ -10,7 +11,6 @@ def ACCT(self, cmd):
 
     massage = caesar_encode(massage, self.step)
     self.client.send(massage)
-
 
 def LIST(self, cmd):
     print('LIST', self.cwd)
@@ -181,6 +181,16 @@ def DELE(self, cmd):
         massage = caesar_encode(massage, self.step)
         self.client.send(massage)
 
+
+def SYST(self, cmd):
+    massage = 'Server type: ' + platform.system() + '\r\n' + \
+              'Server name: ' + os.name + '\r\n' + \
+              'Server release: ' + platform.release() + '\r\n' + \
+              'Server machine: ' + platform.machine() + '\r\n' + \
+              'Server version: ' + platform.version() + '\r\n'
+
+    massage = caesar_encode(massage, self.step)
+    self.client.send(massage)
 
 def STOR(self, cmd):
     path = cmd[4:].strip()
