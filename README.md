@@ -1,21 +1,27 @@
-# **File Transfer Protocol - Caesars Method**
+# **File Transfer Protocol - Includes Encryption layer**
 
 
 ### **SCE 2020 - Data security project**
 
 
 ## **How to run**
-- clone this project
-- make sure you have python 3 installed, and Libraries: `socket`, `pandas`.
-- open terminal session and run the server by typing `python ftpserver.py` (by default server will use localhost, port 10021 for transfer &amp; 10020 for data transfer)
-- In a different terminal session, run the client by typing `python ftpclient.py` (by default it will connect to localhost port 10021 &amp; 10020) 
-- Enter username and password to login:
 
-	a. username: `<roni>`, password: `<abcdefg>` 
+- clone this project
+- make sure you have python 3 installed, and Libraries: `socket`, `pandas`, `DES`, `xlsxwriter`.
+- open terminal session and run the server by typing `python ftpserver.py` (by default server will use localhost, port 10000 for transfer &amp; 10001 for data transfer)
+
+	Click [1] to add a new user to the system. (The usernames will be encrypted in the `clients.xlsx` file)
 	
-	b. username: `<sce>`, password: `<qwer>` 
+- In a different terminal session, run the client by typing `python ftpclient.py` (by default it will connect to localhost port 10000 &amp; 1000;) 
+- Enter username and password to login:
+- Select the required encryption [1] Caesar [2] DES
+
+Caesar : https://en.wikipedia.org/wiki/Caesar_cipher
+DES : https://en.wikipedia.org/wiki/Data_Encryption_Standard
+
+
+- The server will provide a unique key to each client according to the code chosen by the client, and now all communications will be encrypted using that key.
 	
-	the username and password read from exel `clients` file. to add mor clients add rows in this file.
 	
 - start to give command to the server (see some **commands** below)
 
@@ -62,7 +68,7 @@ https://en.wikipedia.org/wiki/List_of_FTP_commands
 
 ### **Milestones**
 
-- Data security (Caesars Method)
+- Data security (Caesars Method, DES)
 - Excel database management
 - Socket
 - Multiprocessing
