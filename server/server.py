@@ -62,14 +62,11 @@ class FTPThreadServer(threading.Thread):
     def run(self):
         key_db = 18
         users = pd.read_excel('clients.xlsx')
-        print(users)
         username = []
         password = []
         for i in range(len(users)):
             username.append(caesar_decode(users.loc[i, 'username'], key_db, mode = 1))
             password.append(caesar_decode(users.loc[i, 'password'], key_db, mode = 1))
-
-        print(username, password)
 
         encryption = self.client.recv(1024)
         encryption = encryption.decode('utf-8')
@@ -319,10 +316,15 @@ class FTPThreadServer(threading.Thread):
             massage = encode(self.encryption, massage, self.step)
             self.client.send(massage)
         except Exception as e:
-            print('ERROR: ' + str(self.client_address) + ': ' + str(e))
-            massage = 'Error writing file.\r\n'
-            massage = encode(self.encryption, massage, self.step)
-            self.client.send(massage)
+            if str(e) != 'ord() expected a character, but string of length 0 found':
+                print('ERROR: ' + str(self.client_address) + ': ' + str(e))
+                massage = 'Error writing file.\r\n'
+                massage = encode(self.encryption, massage, self.step)
+                self.client.send(massage)
+            else:
+                massage = 'Transfer complete.\r\n'
+                massage = encode(self.encryption, massage, self.step)
+                self.client.send(massage)
         finally:
             client_data.close()
             self.close_datasock()
@@ -461,18 +463,23 @@ def users():
     while True:
         print('Current usernames and passwords are:\n')
         print(users)
+        username = []
+        password = []
+        for i in range(len(users)):
+            username.append(caesar_decode(users.loc[i, 'username'], key, mode=1))
+            password.append(caesar_decode(users.loc[i, 'password'], key, mode=1))
+        print('Current usernames: ', username)
+        print('Current password: ', password)
         user = raw_input('Please enter a username\n')
         user = caesar_encode(user, key, mode = 1)
         passw = raw_input('Please enter a password\n')
         passw = caesar_encode(passw, key, mode = 1)
-        print('Added successfully!')
+        print(user, ' Added successfully!')
         users.loc[len(users)] = {'username': user, 'password': passw}
         mor = raw_input('To add another user press [1] otherwise enter\n')
         if mor != '1':
             break
     users.to_excel('clients.xlsx', index=False)
-
-
 
 #main
 
